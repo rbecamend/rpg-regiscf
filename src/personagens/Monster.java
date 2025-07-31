@@ -1,5 +1,8 @@
 package personagens;
 
+import enums.ResultadoAtaque;
+import principal.Log;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
@@ -37,4 +40,6 @@ public abstract class Monster extends Player{
                 return vivos.get(rand.nextInt(vivos.size()));
         }
     }
+
+    public abstract ResultadoAtaque usar(Player alvo, Log log);
 }

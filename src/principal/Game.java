@@ -34,13 +34,13 @@ public class Game {
         // Embaralhar opções
         Collections.shuffle(opcoes);
 
-        System.out.println("\n===== SELECIONE 3 HERÓIS =====");
+        System.out.println("\n===== SELECIONE 4 HERÓIS =====");
         for (int i = 0; i < opcoes.size(); i++) {
             System.out.println((i+1) + ". " + opcoes.get(i));
         }
 
         Set<Integer> escolhas = new HashSet<>();
-        while (herois.size() < 3) {
+        while (herois.size() < 4) {
             System.out.print("\nEscolha o herói #" + (herois.size() + 1) + " (1-" + opcoes.size() + "): ");
             try {
                 int escolha = scanner.nextInt();
@@ -49,20 +49,22 @@ public class Game {
                 } else if (escolhas.contains(escolha)) {
                     System.out.println("Herói já selecionado! Escolha outro.");
                 } else {
-                    herois.add(opcoes.get(escolha - 1));
+                    Hero heroiEscolhido = opcoes.get(escolha - 1);
+                    herois.add(heroiEscolhido);
                     escolhas.add(escolha);
-                    System.out.println("Selecionado: " + opcoes.get(escolha - 1).getNome());
+                    System.out.println("Selecionado: " + heroiEscolhido.getNome() +
+                            " | HP: " + heroiEscolhido.getHp() +
+                            " | ATK: " + heroiEscolhido.getAtaque());
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Entrada inválida! Digite um número.");
-                scanner.next(); // Limpa o buffer
+                scanner.next();
             }
         }
     }
 
     public void gerarMonstros() {
-        int base = herois.size();
-        int quantidade = base + dificuldade + 1;
+        int quantidade = 4 + dificuldade; //
 
         List<Class<? extends Monster>> classes = Arrays.asList(
                 Goblin.class, Orc.class, Dragao.class,
@@ -77,7 +79,7 @@ public class Game {
                 monstros.add(monstro);
             } catch (Exception e) {
                 System.err.println("Erro ao criar monstro: " + e.getMessage());
-                monstros.add(new Goblin()); // Fallback
+                monstros.add(new Goblin());
             }
         }
     }
@@ -85,12 +87,18 @@ public class Game {
     public void iniciarJogo() {
         gerarMonstros();
         log.registrar("===== INÍCIO DA BATALHA =====");
-        log.registrar("Heróis: " + herois.stream().map(Hero::getNome).collect(Collectors.joining(", ")));
-        log.registrar("Monstros: " + monstros.stream().map(Monster::getNome).collect(Collectors.joining(", ")));
+        log.registrar("Heróis: " + herois.stream()
+                .map(h -> h.getNome() + " (HP: " + h.getHp() + ")")
+                .collect(Collectors.joining(", ")));
+
+        log.registrar("Monstros: " + monstros.stream()
+                .map(m -> m.getNome() + " (HP: " + m.getHp() + ")")
+                .collect(Collectors.joining(", ")));
 
         int turno = 1;
         while (!jogoAcabou()) {
             log.registrar("\n--- TURNO " + turno + " ---");
+            System.out.println("\n=============== TURNO " + turno + " ===============");
 
             List<Player> todosJogadores = new ArrayList<>();
             todosJogadores.addAll(herois);
@@ -103,14 +111,17 @@ public class Game {
             herois.removeIf(h -> h.getHp() <= 0);
             monstros.removeIf(m -> m.getHp() <= 0);
 
-            turno++;
+            // Mostrar status resumido
+            System.out.println("\nStatus após o turno:");
+            System.out.println("Heróis: " + herois.stream()
+                    .map(h -> h.getNome() + " (" + h.getHp() + ")")
+                    .collect(Collectors.joining(", ")));
 
-            // Pausa entre turnos
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            System.out.println("Monstros: " + monstros.stream()
+                    .map(m -> m.getNome() + " (" + m.getHp() + ")")
+                    .collect(Collectors.joining(", ")));
+
+            turno++;
         }
 
         terminarJogo();
@@ -121,45 +132,46 @@ public class Game {
     }
 
     private void terminarJogo() {
-        log.registrar("\n=== FIM DE JOGO ===");
         if (herois.isEmpty()) {
-            log.registrar("Monstros venceram!");
+            log.registrar("\n=== FIM DE JOGO ===");
+            log.registrar("MONSTROS VENCERAM!");
+            System.out.println("\n=================================");
+            System.out.println("       MONSTROS VENCERAM!");
+            System.out.println("=================================");
         } else {
-            log.registrar("Heróis venceram!");
+            log.registrar("\n=== FIM DE JOGO ===");
+            log.registrar("HERÓIS VENCERAM!");
+            System.out.println("\n=================================");
+            System.out.println("       HERÓIS VENCERAM!");
+            System.out.println("=================================");
         }
 
         log.registrar("\nRESUMO FINAL:");
         log.registrar("Heróis sobreviventes: " + herois.size());
         log.registrar("Monstros derrotados: " + monstros.size());
 
-        System.out.println("\n===== RESULTADO FINAL =====");
-        log.imprimirLog();
-    }
+        System.out.println("\nResumo Final:");
+        System.out.println("Heróis sobreviventes: " + herois.size());
+        System.out.println("Monstros derrotados: " + monstros.size());
 
-    public static void main(String[] args) {
+        // Opção para visualizar log
         Scanner scanner = new Scanner(System.in);
+        System.out.println("\nDeseja visualizar o log completo da batalha? (S/N)");
+        String escolha = scanner.next();
 
-        System.out.println("===== JOGO DE TURNOS - BATALHA ÉPICA =====");
-
-        int dificuldade = 0;
-        boolean entradaValida = false;
-        while (!entradaValida) {
-            try {
-                System.out.print("\nSelecione a dificuldade (1-Fácil, 2-Médio, 3-Difícil): ");
-                dificuldade = scanner.nextInt();
-                if (dificuldade < 1 || dificuldade > 3) {
-                    System.out.println("Dificuldade inválida! Escolha 1, 2 ou 3.");
-                } else {
-                    entradaValida = true;
-                }
-            } catch (InputMismatchException e) {
-                System.out.println("Entrada inválida! Digite um número.");
-                scanner.next(); // Limpa o buffer
-            }
+        if (escolha.equalsIgnoreCase("S")) {
+            System.out.println("\n===== LOG COMPLETO DA BATALHA =====");
+            log.imprimirLog();
         }
 
-        Game jogo = new Game(dificuldade);
-        jogo.selecionarHerois();
-        jogo.iniciarJogo();
+        // Opção para jogar novamente
+        System.out.println("\nDeseja voltar ao menu principal? (S/N)");
+        escolha = scanner.next();
+
+        if (escolha.equalsIgnoreCase("S")) {
+            Main.main(new String[]{});
+        } else {
+            System.exit(0);
+        }
     }
 }

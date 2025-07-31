@@ -12,6 +12,7 @@ public abstract class Player {
     protected int defesa;
     protected int destreza;
     protected int velocidade;
+    protected int ultimoDano;
 
     public Player(String nome, int minHp, int maxHp, int minAtaque, int maxAtaque,
                   int minDefesa, int maxDefesa, int minDestreza, int maxDestreza,
@@ -40,6 +41,12 @@ public abstract class Player {
     public void setHp(int hp) {
         this.hp = Math.max(0, Math.min(hp, maxHp));
     }
+
+    public int getUltimoDano() { return ultimoDano; }
+
+    public void setAtaque(int ataque) {this.ataque = ataque;}
+
+    public void setDefesa(int defesa) {this.defesa = defesa;}
 
     public abstract ResultadoAtaque realizarAtaque(Player alvo);
 

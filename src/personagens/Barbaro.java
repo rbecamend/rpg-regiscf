@@ -1,10 +1,14 @@
 package personagens;
 
 import enums.ResultadoAtaque;
+import interfaces.HabilidadeEspecial;
+import principal.Log;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Barbaro extends Hero{
+public class Barbaro extends Hero implements HabilidadeEspecial {
+    private int ultimoDano;
+
     public Barbaro() {
         super("Bárbaro", 130, 160, 18, 25, 8, 14, 6, 10, 9, 13);
     }
@@ -27,5 +31,35 @@ public class Barbaro extends Hero{
 
         alvo.setHp(alvo.getHp() - dano);
         return ResultadoAtaque.ACERTOU;
+    }
+
+    @Override
+    public ResultadoAtaque usar(Player alvo, Log log) {
+        log.registrar(getNome() + " entra em FÚRIA BÁRBARA!");
+
+        // Aumenta ataque mas reduz defesa
+        int ataqueAntes = getAtaque();
+        int defesaAntes = getDefesa();
+
+        setAtaque(getAtaque() + 15);
+        setDefesa(Math.max(1, getDefesa() - 5));
+
+        int dano = (int)(ataque * 2.2) - (alvo.getDefesa() / 4);
+        alvo.setHp(alvo.getHp() - dano);
+        ultimoDano = dano;
+
+        log.registrar("Ataque aumentado de " + ataqueAntes + " para " + getAtaque() + "!");
+        log.registrar("Defesa reduzida de " + defesaAntes + " para " + getDefesa() + "!");
+        log.registrar("Causou " + dano + " de dano em " + alvo.getNome() + "!");
+
+        return ResultadoAtaque.CRITICAL_HIT;
+    }
+
+    public void setAtaque(int ataque) {
+        this.ataque = ataque;
+    }
+
+    public void setDefesa(int defesa) {
+        this.defesa = defesa;
     }
 }

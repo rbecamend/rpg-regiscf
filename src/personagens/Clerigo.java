@@ -1,10 +1,14 @@
 package personagens;
 
 import enums.ResultadoAtaque;
+import interfaces.HabilidadeEspecial;
+import principal.Log;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Clerigo extends Hero{
+public class Clerigo extends Hero implements HabilidadeEspecial {
+    private int ultimoDano;
+
     public Clerigo() {
         super("Clérigo", 90, 110, 12, 16, 10, 15, 10, 14, 8, 12);
     }
@@ -27,6 +31,20 @@ public class Clerigo extends Hero{
         }
 
         alvo.setHp(alvo.getHp() - dano);
+        return ResultadoAtaque.ACERTOU;
+    }
+
+    @Override
+    public ResultadoAtaque usar(Player alvo, Log log) {
+        log.registrar(getNome() + " invoca a LUZ SAGRADA para curar!");
+
+        // Cura um aliado aleatório (incluindo si mesmo)
+        int cura = ThreadLocalRandom.current().nextInt(20, 35);
+        int hpAntes = getHp();
+        setHp(Math.min(getMaxHp(), getHp() + cura));
+        int curado = getHp() - hpAntes;
+
+        log.registrar(getNome() + " recuperou " + curado + " pontos de vida!");
         return ResultadoAtaque.ACERTOU;
     }
 }
